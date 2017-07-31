@@ -1,0 +1,6 @@
+{
+  "DEBUG": true,
+  "SECRET_KEY": "Hard To Guess",
+  "SQLALCHEMY_TRACK_MODIFICATIONS": true,
+  "SQLALCHEMY_DATABASE_URI": "mysql://xsy:123456@localhost/store"
+}

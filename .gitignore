@@ -1,0 +1,9 @@
+node_modules
+migrations
+dist
+client.
+._pycache_
+.idea
+.package-lock.json
+*.pyc
+*.log
