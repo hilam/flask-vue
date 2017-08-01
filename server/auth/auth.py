@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 import time
 from datetime import datetime, timedelta
-from flask import request, jsonify
+from flask import request, jsonify, g
 from ..app_factory import db
 from ..models import User, RegisterUser
 from . import auth_blueprint
@@ -89,46 +89,44 @@ def confirm_register():
 def logout():
 	#todo: 完成用户注销
 	pass
-	return jsonify(message='0')
+	return jsonify(status='0', access_token=g.access_token)
 
 
 @auth_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
-	if request.method == 'POST':
+	data = request.get_json()
+	phone = data.get('phone', '')
+	password = data.get('password', '')
 
-		data = request.get_json()
-		phone = data.get('phone', '')
-		password = data.get('password', '')
+	if phone is None or password is None:
+		return jsonify(status=1, message=u'请输入帐号和密码')
 
-		if phone is None or password is None:
-			return jsonify(status=1, message=u'请输入帐号和密码')
+	'''
+	记录用户登录日志
+	'''
+	from ..models import UserLoginLog
 
-		'''
-		记录用户登录日志
-		'''
-		from ..models import UserLoginLog
+	ip = request.headers.get('X-Real-IP', '')
+	log = UserLoginLog(phone=phone, ip=ip)
 
-		ip = request.headers.get('X-Real-IP', '')
-		log = UserLoginLog(phone=phone, ip=ip)
+	try:
+		db.session.add(log)
+		db.session.commit()
+	except Exception as e:
+		print(e)
+		db.session.rollback()
 
-		try:
-			db.session.add(log)
-			db.session.commit()
-		except Exception as e:
-			print(e)
-			db.session.rollback()
+	user = User.query.filter_by(phone=phone).first()
+	if user is not None and user.verify_password(password):
 
-		user = User.query.filter_by(phone=phone).first()
-		if user is not None and user.verify_password(password):
+		from utils.auth_token import encode_auth_token
 
-			from utils.auth_token import encode_auth_token
+		access_token = encode_auth_token(user.id, user.username, 'access_token')
+		refresh_token = encode_auth_token(user.id, user.username, 'refresh_token')
+		return jsonify(status=0, access_token=access_token, refresh_token=refresh_token)
 
-			timestamp = int(time.time())
-			token = encode_auth_token(user.id, timestamp).decode('utf-8')  # 将bytes转化为str
-			return jsonify(status=0, token=token)
-
-		else:
-			return jsonify(status=1, message=u'帐号或密码错误')
+	else:
+		return jsonify(status=1, message=u'帐号或密码错误')
 
 
 @auth_blueprint.route('/edit_profile', methods=['POST'])
@@ -138,7 +136,7 @@ def edit_profile():
 	data = request.get_json()
 	username = data.get('username')
 	if username is None:
-		return jsonify(status=0, message=u'请输入用户名')
+		return jsonify(status=1, message=u'请输入用户名')
 	user = User.query.filter_by(username=username).first()
 	if user:
 		return jsonify(status=1, message=u"用户名已存在")

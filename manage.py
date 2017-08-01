@@ -15,6 +15,15 @@ manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
 
+@manager.command
+def deploy():
+    """Run deployment tasks."""
+    from flask_migrate import upgrade
+    from server.models import User
+
+    # migrate database to latest revision
+    upgrade()
+
 
 
 if __name__ == '__main__':
