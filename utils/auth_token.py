@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 import jwt, datetime, time
 from functools import wraps
-from flask import current_app, request, jsonify, g
+from flask import request, jsonify, g
 from manage import app
 
 
@@ -72,16 +72,21 @@ def generate_new_token():
 		return None
 
 
+# 加载用户
 def user_loader():
 	from server.models import User
-	token = request.headers.get('token')
-	id = decode_auth_token(token).get('id', '')
+	if g.access_token == None:
+		access_token = request.headers.get('access_token')
+	else:
+		access_token = g.access_token
+	id = decode_auth_token(access_token).get('id', '')
 	current_user = User.query.filter_by(id=id).first()
 	if current_user:
 		return current_user
 	return None
 
 
+# 以装饰器形式验证用户的token
 def token_required(func):
 	@wraps(func)
 	def wrapper_func(*args, **kwargs):

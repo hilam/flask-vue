@@ -1,5 +1,4 @@
 # -*- coding:utf-8 -*-
-import time
 from datetime import datetime, timedelta
 from flask import request, jsonify, g
 from ..app_factory import db
@@ -11,6 +10,9 @@ from utils.regexp import re_password, re_phone
 
 @auth_blueprint.route('/dispatch_captcha', methods=["POST"])
 def dispatch_captcha():
+	"""
+	获取短信验证码
+	"""
 	data = request.get_json()
 	phone = data.get('phone', '')
 
@@ -45,6 +47,9 @@ def dispatch_captcha():
 
 @auth_blueprint.route('/register', methods=["POST"])
 def confirm_register():
+	"""
+	注册 
+	"""
 	current_time = datetime.now()
 	data = request.get_json()
 	phone = data.get('phone', '')
@@ -94,6 +99,9 @@ def logout():
 
 @auth_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
+	"""
+	登录,分发access_token, refresh_token
+	"""
 	data = request.get_json()
 	phone = data.get('phone', '')
 	password = data.get('password', '')
@@ -144,7 +152,7 @@ def edit_profile():
 	try:
 		db.session.add(current_user)
 		db.session.commit()
-		return jsonify(status=0)
+		return jsonify(status=0, access_token=g.access_token)
 	except Exception as e:
 		print(e)
 		return jsonify(status=1, message=u'系统错误')
@@ -166,7 +174,7 @@ def change_password():
 		try:
 			db.session.add(current_user)
 			db.session.commit()
-			return jsonify(status=0)
+			return jsonify(status=0, access_token=g.access_token)
 		except Exception as e:
 			print(e)
 			return jsonify(status=1, message=u"系统错误")

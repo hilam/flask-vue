@@ -1,7 +1,7 @@
 node_modules
+frontend
 migrations
 dist
-client.
 ._pycache_
 .idea
 .package-lock.json

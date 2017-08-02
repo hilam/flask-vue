@@ -16,6 +16,12 @@ manager.add_command('db', MigrateCommand)
 
 
 @manager.command
+def create_db():
+    """Creates the db tables."""
+    db.create_all()
+
+
+@manager.command
 def deploy():
     """Run deployment tasks."""
     from flask_migrate import upgrade
@@ -23,7 +29,6 @@ def deploy():
 
     # migrate database to latest revision
     upgrade()
-
 
 
 if __name__ == '__main__':
