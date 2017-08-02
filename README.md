@@ -1,3 +1,7 @@
+:exclamation:*this appication is dependent by Python3.6,to make sure installed python3.6.*
+
+---
+
 + ## What`s this?
 > + Flask-vue is a solution for project which uses flask and vue.
 > + You also can use the flask module or vue module in your project.
@@ -35,4 +39,6 @@ run `python manage.py runserver`
 
 ---
 
-:exclamation:*this appication is dependent by Python3.6,to make sure installed python3.6.*
+## todo
++ [ ] front-end
+
